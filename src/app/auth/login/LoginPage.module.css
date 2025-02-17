@@ -1,0 +1,126 @@
+/* Scoped styles (local to the component) */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+}
+
+.formContainer {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 40px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.inputGroup {
+  margin-bottom: 15px;
+}
+
+.inputGroup label {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.inputGroup input:focus {
+  border-color: #3a4750;
+  outline: none;
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  background-color: #3a4750;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.googleButton {
+  width: 100%;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.button:hover {
+  background-color: #5e6d77;
+}
+
+.signup {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.signup p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.signup button {
+  margin-top: 8px;
+  background-color: #56cfe1;
+  border-color: #56cfe1;
+}
+
+.signup button:hover {
+  background-color: #4bb4c1;
+  border-color: #4bb4c1;
+}
+
+.error {
+  color: #ff0000;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+  .formContainer {
+    padding: 30px;
+    max-width: 100%;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .inputGroup input {
+    font-size: 0.9rem;
+  }
+
+  .button {
+    font-size: 0.9rem;
+  }
+
+  .signup p {
+    font-size: 0.85rem;
+  }
+}
+
