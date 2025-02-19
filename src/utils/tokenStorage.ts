@@ -1,7 +1,7 @@
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export const setToken = (token: string) => {
-  Cookies.set("auth_token", token, { expires: 7, path: '/' });
+  Cookies.set("auth_token", token, { expires: 7, path: "/" });
 };
 
 export const getToken = () => {
@@ -14,4 +14,11 @@ export const getToken = () => {
 
 export const removeToken = () => {
   Cookies.remove("auth_token");
+};
+
+export const getUserIdFromToken = (token: string | null) => {
+  if (!token) return null;
+  const [, payload] = token.split(".");
+  const data = JSON.parse(atob(payload));
+  return data.sub as string;
 };
