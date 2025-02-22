@@ -5,9 +5,12 @@ import useSocket from "@/hooks/useSocket";
 import { Conversation } from "@/types/conversation";
 import { Message } from "@/types/message";
 import { User } from "@/types/user";
-import { getToken, getUserIdFromToken } from "@/utils/tokenStorage";
+import { getToken, getUserIdFromToken, removeToken } from "@/utils/tokenStorage";
 import { v4 } from "uuid";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function Home() {
   const token = getToken();
@@ -199,49 +202,93 @@ export default function Home() {
     };
   }, [socket]);
 
+  const router = useRouter();
+  const { setToast, showToast, getToast } = useToast();
+  useEffect(() => {
+    if (getToast() !== null) {
+      showToast();
+    }
+  }, [showToast, getToast]);
+  const handleLogout = () => {
+    router.replace("/auth/login");
+    setToast("Logout successful.");
+    removeToken();
+  };
+
   return loading ? (
     <div className="flex items-center justify-center h-screen">
       <div className="text-xl font-semibold">Loading...</div>
     </div>
   ) : (
     <div className="flex flex-col md:flex-row h-screen">
-      <aside className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto">
-        <div className="mb-4">
-          <h1 className="text-xl font-bold text-gray-700">Conversations</h1>
-          {[...conversations]
-            .sort(
-              (a, b) =>
-                new Date(b.lastMessageAt).getTime() -
-                new Date(a.lastMessageAt).getTime()
-            )
-            .map((conversation) => (
+      <aside className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto flex flex-col justify-between">
+        <div>
+          <div className="mb-4">
+            <h1 className="text-xl font-bold text-gray-700">Conversations</h1>
+            {[...conversations]
+              .sort(
+                (a, b) =>
+                  new Date(b.lastMessageAt).getTime() -
+                  new Date(a.lastMessageAt).getTime()
+              )
+              .map((conversation) => (
+                <div
+                  key={conversation.id}
+                  onClick={() => selectUser(conversation.user)}
+                  className={`p-2 mt-2 rounded cursor-pointer ${
+                    selectedUser?.id === conversation.user.id
+                      ? "bg-blue-200"
+                      : "bg-white"
+                  }`}
+                >
+                  {conversation.user.name} -{" "}
+                  {new Date(conversation.lastMessageAt).toLocaleString()}
+                </div>
+              ))}
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-700">Users</h1>
+            {users.map((user) => (
               <div
-                key={conversation.id}
-                onClick={() => selectUser(conversation.user)}
+                key={user.id}
+                onClick={() => selectUser(user)}
                 className={`p-2 mt-2 rounded cursor-pointer ${
-                  selectedUser?.id === conversation.user.id
-                    ? "bg-blue-200"
-                    : "bg-white"
+                  selectedUser?.id === user.id ? "bg-blue-200" : "bg-white"
                 }`}
               >
-                {conversation.user.name} -{" "}
-                {new Date(conversation.lastMessageAt).toLocaleString()}
+                {user.name}
               </div>
             ))}
+          </div>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-700">Users</h1>
-          {users.map((user) => (
-            <div
-              key={user.id}
-              onClick={() => selectUser(user)}
-              className={`p-2 mt-2 rounded cursor-pointer ${
-                selectedUser?.id === user.id ? "bg-blue-200" : "bg-white"
-              }`}
-            >
-              {user.name}
+          {currentUser && (
+            <div className="mt-4">
+              <div className="flex items-center mt-2">
+                <Image
+                  src={currentUser.avatar || "/default-avatar.png"}
+                  alt={currentUser.name}
+                  width={50}
+                  height={50}
+                  className="rounded-full"
+                />
+                <div className="ml-4">
+                  <div className="text-lg font-semibold">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {currentUser.email}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 w-full mt-4 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+              >
+                Logout
+              </button>
             </div>
-          ))}
+          )}
         </div>
       </aside>
       <main className="flex-1 p-4 flex flex-col">
