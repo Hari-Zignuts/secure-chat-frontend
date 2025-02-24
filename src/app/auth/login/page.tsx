@@ -47,7 +47,9 @@ const LoginPage = () => {
   const handleGoogleLogin = async (response: any) => {
     setLoading(true);
     try {
+      console.log(response);
       const data = await authService.google(response.credential);
+      console.log(data);
       if (data?.statusCode === 200) {
       setToken(data.data.token);
       setToast("Login successful.");

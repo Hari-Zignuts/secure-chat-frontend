@@ -5,7 +5,11 @@ import useSocket from "@/hooks/useSocket";
 import { Conversation } from "@/types/conversation";
 import { Message } from "@/types/message";
 import { User } from "@/types/user";
-import { getToken, getUserIdFromToken, removeToken } from "@/utils/tokenStorage";
+import {
+  getToken,
+  getUserIdFromToken,
+  removeToken,
+} from "@/utils/tokenStorage";
 import { v4 } from "uuid";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -37,6 +41,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!token) return;
       try {
         setLoading(true);
         setAuthToken(token);
@@ -66,8 +71,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!token) return;
-    if (!conversation) return;
     const fetchMessages = async () => {
+      if (!conversation) return;
       try {
         setMessageLoader(true);
         if (fetchedConversationMessages.includes(conversation.id)) return;
@@ -87,7 +92,7 @@ export default function Home() {
       }
     };
     fetchMessages();
-  }, [conversation]);
+  }, [conversation, fetchedConversationMessages, token]);
 
   useEffect(() => {
     if (!conversation) {
@@ -121,6 +126,7 @@ export default function Home() {
       message,
       senderId: currentUser.id,
       receiverId: selectedUser.id,
+      createdAt: new Date().toISOString(),
     });
     const newMessage: Partial<Message> = {
       id: v4(),
@@ -158,13 +164,28 @@ export default function Home() {
     setMessage("");
   };
 
+  const [isTabActive, setIsTabActive] = useState(true);
+
+  // Track window/tab focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsTabActive(!document.hidden);
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   useEffect(() => {
     if (!socket) return;
+
     const messageHandler = (newMessage: Message) => {
-      const isConversionExist = conversationRef.current.find(
+      const isConversationExist = conversationRef.current.find(
         (conversation) => conversation.user.id === newMessage.sender.id
       );
-      if (!isConversionExist) {
+
+      if (!isConversationExist) {
         setConversations((prev) => [
           ...prev,
           {
@@ -181,26 +202,46 @@ export default function Home() {
         setConversations((prev) =>
           prev.map((conversation) => {
             if (conversation.user.id === newMessage.sender.id) {
-              return {
-                ...conversation,
-                lastMessageAt: newMessage.createdAt,
-              };
+              return { ...conversation, lastMessageAt: newMessage.createdAt };
             }
             return conversation;
           })
         );
+
         const updatedMessage = {
           ...newMessage,
-          conversation: isConversionExist,
+          conversation: isConversationExist,
         };
         setMessages((prev) => [...prev, updatedMessage]);
       }
+
+      // Push notification conditions
+      if (!isTabActive || selectedUser?.id !== newMessage.sender.id) {
+        sendNotification(newMessage);
+      }
     };
+
     socket.on("receiveMessage", messageHandler);
     return () => {
       socket.off("receiveMessage", messageHandler);
     };
-  }, [socket]);
+  }, [socket, isTabActive, selectedUser]);
+
+  const sendNotification = (message: Message) => {
+    if (!("Notification" in window)) return;
+
+    // Request permission if not granted
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    if (Notification.permission === "granted") {
+      new Notification(`New message from ${message.sender.name}`, {
+        body: message.message,
+        icon: message.sender.avatar || "/default-avatar.png",
+      });
+    }
+  };
 
   const router = useRouter();
   const { setToast, showToast, getToast } = useToast();
@@ -235,14 +276,40 @@ export default function Home() {
                 <div
                   key={conversation.id}
                   onClick={() => selectUser(conversation.user)}
-                  className={`p-2 mt-2 rounded cursor-pointer ${
+                  className={`p-3 mt-2 rounded-lg cursor-pointer flex items-center space-x-3 ${
                     selectedUser?.id === conversation.user.id
-                      ? "bg-blue-200"
+                      ? "bg-blue-100"
                       : "bg-white"
-                  }`}
+                  } hover:bg-gray-50 transition duration-200`}
                 >
-                  {conversation.user.name} -{" "}
-                  {new Date(conversation.lastMessageAt).toLocaleString()}
+                  {/* Avatar */}
+                  <Image
+                    src={conversation.user.avatar || "/default-avatar.png"} // Fallback to default avatar if none exists
+                    alt={conversation.user.name}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+
+                  <div className="flex-1">
+                    {/* User Name */}
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">
+                        {conversation.user.name}
+                      </span>
+                    </div>
+
+                    {/* Last Message */}
+                    <div className="text-sm text-gray-500">
+                      {conversation.lastMessageAt && (
+                        <span className="text-gray-400 text-xs">
+                          {new Date(
+                            conversation.lastMessageAt
+                          ).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
           </div>
@@ -292,9 +359,26 @@ export default function Home() {
         </div>
       </aside>
       <main className="flex-1 p-4 flex flex-col">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">
-          {selectedUser?.name || "Select a user to continue chat"}
-        </h1>
+        <div className="flex items-center mb-4">
+          {selectedUser ? (
+            <>
+              <Image
+                src={selectedUser.avatar || "/default-avatar.png"}
+                alt={selectedUser.name}
+                width={50}
+                height={50}
+                className="rounded-full"
+              />
+              <h1 className="text-2xl font-bold text-gray-800 ml-4">
+                {selectedUser.name}
+              </h1>
+            </>
+          ) : (
+            <h1 className="text-2xl font-bold text-gray-800">
+              Select a user to start chatting
+            </h1>
+          )}
+        </div>
         <div className="flex-1 overflow-y-auto flex flex-col-reverse">
           {messageLoader && selectedUser ? (
             <div className="text-center">Loading...</div>
