@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { createContext, useContext, ReactNode, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -28,7 +28,7 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = () => {
-    toast.success(toastMessage);
+    toast.success(toastMessage, { autoClose: 2000 });
     removeToast();
   };
 

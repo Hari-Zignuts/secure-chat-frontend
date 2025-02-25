@@ -40,6 +40,10 @@ export default function Home() {
   conversationRef.current = conversations;
 
   useEffect(() => {
+    // Request permission if not granted
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
     const fetchData = async () => {
       if (!token) return;
       try {

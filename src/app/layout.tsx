@@ -1,5 +1,4 @@
 import { ToastProvider } from "../contexts/ToastContext"; // Import ToastProvider
-import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -35,7 +34,6 @@ export default function RootLayout({
         >
           <ToastProvider>
             {children}
-            <ToastContainer />
           </ToastProvider>
         </GoogleOAuthProvider>
       </body>
