@@ -269,7 +269,7 @@ export default function Home() {
 
   return loading ? (
     <div className="flex items-center justify-center h-screen">
-      <div className="text-xl font-semibold">Loading...</div>
+      <div className="w-16 h-16 border-4 border-gray-200 border-t-4 border-t-blue-500 rounded-full animate-spin"></div>
     </div>
   ) : (
     <div className="flex flex-col md:flex-row h-screen">
@@ -308,14 +308,21 @@ export default function Home() {
                       <span className="font-semibold">
                         {conversation.user.name}
                       </span>
-                        <span className="text-gray-400 text-xs">
-                        {new Date(conversation.lastMessageAt).toLocaleDateString() === new Date().toLocaleDateString()
-                          ? new Date(conversation.lastMessageAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                          : new Date(conversation.lastMessageAt).toLocaleDateString()}
-                        </span>
+                      <span className="text-gray-400 text-xs">
+                        {new Date(
+                          conversation.lastMessageAt
+                        ).toLocaleDateString() ===
+                        new Date().toLocaleDateString()
+                          ? new Date(
+                              conversation.lastMessageAt
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : new Date(
+                              conversation.lastMessageAt
+                            ).toLocaleDateString()}
+                      </span>
                     </div>
 
                     {/* Last Message */}
@@ -394,42 +401,45 @@ export default function Home() {
         </div>
         <div className="flex-1 overflow-y-auto p-4 bg-gray-50 rounded-lg shadow-inner flex flex-col-reverse">
           {messageLoader && selectedUser ? (
-            <div className="text-center text-gray-500">Loading...</div>
+            <div className="flex justify-center items-center">
+              <div className="w-8 h-8 border-4 border-gray-200 border-t-4 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
           ) : (
             <div className="space-y-4">
               {selectedUserMessages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.sender.id === currentUser?.id
-                ? "justify-end"
-                : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[70%] p-2 rounded-lg ${
-              message.sender.id === currentUser?.id
-                ? "bg-blue-500 text-white self-end"
-                : "bg-gray-200 text-gray-800 self-start"
-              } shadow-md`}
-            >
-                <div className="text-sm">{message.message}</div>
                 <div
-                className={`text-xs mt-1 ${
-                  message.sender.id === currentUser?.id
-                  ? "text-blue-200"
-                  : "text-gray-500"
-                }`}
+                  key={message.id}
+                  className={`flex ${
+                    message.sender.id === currentUser?.id
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
                 >
-                {new Date(message.createdAt).toLocaleDateString() === new Date().toLocaleDateString()
-                  ? new Date(message.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                  : new Date(message.createdAt).toLocaleDateString()}
+                  <div
+                    className={`max-w-[70%] p-2 rounded-lg ${
+                      message.sender.id === currentUser?.id
+                        ? "bg-blue-500 text-white self-end"
+                        : "bg-gray-200 text-gray-800 self-start"
+                    } shadow-md`}
+                  >
+                    <div className="text-sm">{message.message}</div>
+                    <div
+                      className={`text-xs mt-1 ${
+                        message.sender.id === currentUser?.id
+                          ? "text-blue-200"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {new Date(message.createdAt).toLocaleDateString() ===
+                      new Date().toLocaleDateString()
+                        ? new Date(message.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : new Date(message.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
                 </div>
-            </div>
-          </div>
               ))}
             </div>
           )}
