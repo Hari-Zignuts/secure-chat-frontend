@@ -276,7 +276,9 @@ export default function Home() {
       <aside className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto flex flex-col justify-between">
         <div>
           <div className="mb-4">
-            <h1 className="text-xl font-bold text-gray-700">Conversations</h1>
+            {conversations.length > 0 && (
+              <h1 className="text-xl font-bold text-gray-700">Conversations</h1>
+            )}
             {[...conversations]
               .sort(
                 (a, b) =>
@@ -334,7 +336,9 @@ export default function Home() {
               ))}
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-700">Users</h1>
+            {users.length > 0 && (
+              <h1 className="text-xl font-bold text-gray-700">Users</h1>
+            )}
             {users.map((user) => (
               <div
                 key={user.id}
@@ -445,16 +449,19 @@ export default function Home() {
           )}
         </div>
         {selectedUser && (
-          <form className="mt-4 flex" onSubmit={sendMessage}>
+          <form
+            className="mt-4 flex items-center space-x-2"
+            onSubmit={sendMessage}
+          >
             <input
               type="text"
-              placeholder="Type here..."
-              className="flex-1 p-2 border rounded-l"
+              placeholder="Type your message..."
+              className="flex-1 p-3 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
-            <button className="bg-blue-500 text-white p-2 rounded-r">
-              Send
+            <button className="bg-green-500 text-white p-3 rounded shadow-md hover:bg-blue-600 transition duration-300">
+              send
             </button>
           </form>
         )}
