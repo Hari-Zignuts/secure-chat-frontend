@@ -166,6 +166,7 @@ export default function Home() {
       setUsers((prev) => prev.filter((user) => user.id !== selectedUser.id));
       newMessage.conversation = newConversation;
     }
+    playSendNotificationSound();
     setMessages((prev) => [...prev, newMessage as Message]);
     setMessage("");
   };
@@ -187,6 +188,8 @@ export default function Home() {
     if (!socket) return;
 
     const messageHandler = (newMessage: Message) => {
+      if(!newMessage.sender) return;
+      playReceiveNotificationSound();
       const isConversationExist = conversationRef.current.find(
         (conversation) => conversation.user.id === newMessage.sender.id
       );
@@ -223,6 +226,7 @@ export default function Home() {
           ...newMessage,
           conversation: isConversationExist,
         };
+
         setMessages((prev) => [...prev, updatedMessage]);
       }
 
@@ -231,12 +235,24 @@ export default function Home() {
         sendNotification(newMessage);
       }
     };
-
     socket.on("receiveMessage", messageHandler);
     return () => {
       socket.off("receiveMessage", messageHandler);
     };
   }, [socket, isTabActive, selectedUser]);
+
+  const playReceiveNotificationSound = () => {
+    const audio = new Audio('/sounds/receive.mp3'); // path from public folder
+    audio.play().catch((err) => {
+      console.warn("Autoplay prevented:", err);
+    });
+  };
+  const playSendNotificationSound = () => {
+    const audio = new Audio('/sounds/send.mp3'); // path from public folder
+    audio.play().catch((err) => {
+      console.warn("Autoplay prevented:", err);
+    });
+  };
 
   const sendNotification = (message: Message) => {
     if (!("Notification" in window)) return;
